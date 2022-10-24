@@ -31,10 +31,12 @@ public class App {
         System.out.println("Digite seu Nome: ");
         Scanner cadastro = new Scanner(System.in);
         String nomePessoa = cadastro.nextLine();
+        cadastro.close();
 
         System.out.println("Digite seu Nível de Acesso: ");
         Scanner acessoNivel = new Scanner(System.in);
         int idAcesso = acessoNivel.nextInt();
+        acessoNivel.close();
 
         String fileName = "pessoa." + nomePessoa + " - " + idAcesso + ".jpg";
         Boolean userExists = false;
