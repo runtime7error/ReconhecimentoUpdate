@@ -103,7 +103,7 @@ public class App {
         for (int i = 0; i < listOfFiles.length; i++) {
             // Verifica se o usuário já existe
             if (listOfFiles[i].getName().equals(fileName)) {
-                System.out.println("Usuário já cadastrado!");
+                System.out.println("Usuário já cadastrado! Iniciando reconhecimento facial...");
                 userExists = true;
                 // Verificação do Nível de Acesso
                 if (listOfFiles[i].getName().contains("1")) {
@@ -242,32 +242,43 @@ public class App {
                 BufferedImage currentUser = ImageIO.read(new File("src\\fotos\\currentUser.jpg"));
 
                 // Comparando saveUser com currentUser
-                int count = 0;
                 int width1 = savedUser.getWidth();
                 int width2 = currentUser.getWidth();
                 int height1 = savedUser.getHeight();
                 int height2 = currentUser.getHeight();
 
                 if ((width1 != width2) || (height1 != height2)) {
-                    System.out.println("As imagens não são do mesmo tamanho");
-                    validUser = false;
+                    System.out.println("Erro ao comparar imagens!");
                 } else {
-                    for (int j = 0; j < width1; j++) {
-                        for (int k = 0; k < height1; k++) {
-                            if (savedUser.getRGB(j, k) != currentUser.getRGB(j, k)) {
-                                count++;
-                            }
+                    long difference = 0;
+                    for (int y = 0; y < height1; y++) {
+                        for (int x = 0; x < width1; x++) {
+                            int rgbA = savedUser.getRGB(x, y);
+                            int rgbB = currentUser.getRGB(x, y);
+                            int redA = (rgbA >> 16) & 0xff;
+                            int greenA = (rgbA >> 8) & 0xff;
+                            int blueA = (rgbA) & 0xff;
+                            int redB = (rgbB >> 16) & 0xff;
+                            int greenB = (rgbB >> 8) & 0xff;
+                            int blueB = (rgbB) & 0xff;
+                            difference += Math.abs(redA - redB);
+                            difference += Math.abs(greenA - greenB);
+                            difference += Math.abs(blueA - blueB);
                         }
                     }
-                    System.out.println("The images are " + (count) + " pixels different");
-                }
 
-                if (count <= 1000) {
-                    System.out.println("Foto reconhecida!");
-                    validUser = true;
-                } else {
-                    System.out.println("Foto não reconhecida!");
-                    validUser = false;
+                    double total_pixels = width1 * height1 * 3;
+                    double avg_different_pixels = difference / total_pixels;
+                    double percentage = (avg_different_pixels / 255) * 100;
+
+                    System.out.println("Porcentagem de diferença: " + percentage + "%");
+
+                    if (percentage < 10) {
+                        System.out.println("Usuário autenticado!");
+                        validUser = true;
+                    } else {
+                        System.out.println("Usuário não autenticado!");
+                    }
                 }
             }
         }
